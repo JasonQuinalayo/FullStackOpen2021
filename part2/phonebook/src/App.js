@@ -81,29 +81,37 @@ const App = () => {
       .then(data=>setPersons(data))
       .catch(err=>console.log(err))
   }, [])
+  const updatePerson = (name, number) => {
+    personService.updatePerson(name, number)
+      .then(newPersons => {
+        setPersons(newPersons)
+        setError('')
+        setConfirmation(`Successfully updated ${name}`)
+      })
+      .catch(err => {
+        console.log(err)
+        setConfirmation('')
+        setError(`${name} has already been removed from the server`)
+      })
+  }
   const handleSubmit = (event) => {
     event.preventDefault()
+    const newPerson = {name: newName, number: newNumber}
     if (!(persons.map(a=>a.name).includes(newName))) {
-      const newPerson = {name: newName, number: newNumber}
       personService.addNewPerson(newPerson)
         .then(newPersonWithId => {
           setPersons(persons.concat(newPersonWithId))
           setError('')
           setConfirmation(`Successfully added ${newName}`)
         })
+        .catch(err => {            
+          if (window.confirm(`${newName} is already added to the phonebook, replace old number?`)) {
+            updatePerson(newName, newNumber)
+          }
+        })
     } else {
       if (window.confirm(`${newName} is already added to the phonebook, replace old number?`)) {
-        personService.updatePerson(newName, newNumber)
-          .then(newPersons => {
-            setPersons(newPersons)
-            setError('')
-            setConfirmation(`Successfully updated ${newName}`)
-          })
-          .catch(err => {
-            console.log(err)
-            setConfirmation('')
-            setError(`${newName} has already been removed from the server`)
-          })
+        updatePerson(newName, newNumber)
       }
     }
     setNewNumber('')

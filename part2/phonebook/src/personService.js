@@ -6,7 +6,12 @@ const getAllPersons = () => (
 )
 
 const addNewPerson = (person) => (
-  axios.post(url, person).then(response=>response.data)
+  getAllPersons()
+    .then(persons => {
+      const possibleDuplicate = persons.find(personCheck => person.name === personCheck.name)
+      if (possibleDuplicate) throw new Error(`${person.name} already added to server`)
+      return axios.post(url, person).then(response=>response.data)
+    })
 )
 
 const deletePerson = (personName) => (
@@ -22,7 +27,7 @@ const updatePerson = (personName, personNumber) => (
   getAllPersons()
     .then(persons=>{
       const personToUpdate = persons.find(person=> person.name === personName)
-      if (!personToUpdate) throw new Error('Person Already Deleted')
+      if (!personToUpdate) throw new Error(`${personName} already deleted from server`)
       const updatedPerson = {...personToUpdate, number:personNumber}
       return axios.put(`${url}/${personToUpdate.id}`, updatedPerson)
         .then(()=>{
