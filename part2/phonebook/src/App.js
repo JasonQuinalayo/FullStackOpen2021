@@ -86,8 +86,8 @@ const App = () => {
     if (!(persons.map(a=>a.name).includes(newName))) {
       const newPerson = {name: newName, number: newNumber}
       personService.addNewPerson(newPerson)
-        .then(newPersonWithId=>setPersons(persons.concat(newPersonWithId)))
-        .then(()=>{
+        .then(newPersonWithId => {
+          setPersons(persons.concat(newPersonWithId))
           setError('')
           setConfirmation(`Successfully added ${newName}`)
         })
