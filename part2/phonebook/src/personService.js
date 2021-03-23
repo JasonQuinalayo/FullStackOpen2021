@@ -1,5 +1,5 @@
 import axios from 'axios'
-const url = 'http://localhost:3001/persons';
+const url = '/api/persons';
 
 const getAllPersons = () => (
   axios.get(url).then(response=>response.data)
@@ -9,7 +9,7 @@ const addNewPerson = (person) => (
   getAllPersons()
     .then(persons => {
       const possibleDuplicate = persons.find(personCheck => person.name === personCheck.name)
-      if (possibleDuplicate) throw new Error(`${person.name} already added to server`)
+      if (possibleDuplicate) throw "DuplicationError"
       return axios.post(url, person).then(response=>response.data)
     })
 )
@@ -27,14 +27,10 @@ const updatePerson = (personName, personNumber) => (
   getAllPersons()
     .then(persons=>{
       const personToUpdate = persons.find(person=> person.name === personName)
-      if (!personToUpdate) throw new Error(`${personName} already deleted from server`)
+      if (!personToUpdate) throw "AlreadyDeletedError"
       const updatedPerson = {...personToUpdate, number:personNumber}
       return axios.put(`${url}/${personToUpdate.id}`, updatedPerson)
-        .then(()=>{
-          const newPersons = persons.filter(person=>person.name !== personName)
-          newPersons.push(updatedPerson);
-          return newPersons;
-        })
+        .then(()=>(updatedPerson))
     })
 )
 

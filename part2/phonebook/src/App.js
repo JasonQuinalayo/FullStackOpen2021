@@ -76,22 +76,33 @@ const App = () => {
   const [ filterString, setFilterString] = useState('')
   const [ confirmation, setConfirmation] = useState('')
   const [ error, setError] = useState('')
-  useEffect(()=>{
+  const generatePersonsList = () => {
     personService.getAllPersons()
       .then(data=>setPersons(data))
       .catch(err=>console.log(err))
+  }
+  useEffect(()=>{
+    generatePersonsList()
   }, [])
   const updatePerson = (name, number) => {
     personService.updatePerson(name, number)
-      .then(newPersons => {
-        setPersons(newPersons)
+      .then(newPerson => {
+        setPersons((()=>{
+          const newPersons = persons.filter(person => person.name !== newPerson.name)
+          newPersons.push(newPerson)
+          return newPersons
+        })())
         setError('')
         setConfirmation(`Successfully updated ${name}`)
       })
       .catch(err => {
-        console.log(err)
-        setConfirmation('')
-        setError(`${name} has already been removed from the server`)
+          setConfirmation('')
+        if (err === 'AlreadyDeletedError') {
+          setError(`${name} has already been removed from the server`)
+          generatePersonsList()
+        } else {
+          setError(err.response.data.error)
+        }
       })
   }
   const handleSubmit = (event) => {
@@ -105,8 +116,11 @@ const App = () => {
           setConfirmation(`Successfully added ${newName}`)
         })
         .catch(err => {            
-          if (window.confirm(`${newName} is already added to the phonebook, replace old number?`)) {
+          if (err === "DuplicationError" && window.confirm(`${newName} is already added to the phonebook, replace old number?`)) {
             updatePerson(newName, newNumber)
+          } else {
+            setConfirmation('')
+            setError(err.response.data.error)
           }
         })
     } else {
