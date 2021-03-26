@@ -5,8 +5,7 @@ const User = require('../models/user');
 usersRouter.post('/', async (request, response) => {
   const { body } = request;
   if (body.password && body.password.length < 3) {
-    response.status(400).send('password must be at least 3 characters long');
-    return;
+    throw Error('password must be at least 3 characters long');
   }
 
   const saltRounds = 10;

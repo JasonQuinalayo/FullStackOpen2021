@@ -27,9 +27,9 @@ const errorHandler = (error, request, response, next) => {
     });
   } else if (error.message === 'missing or invalid token' || error.message === 'unauthorized deletion'
     || error.message === 'unauthorized update' || error.message === 'invalid username or password') {
-    response.status(401).json({
-      error: error.message,
-    });
+    response.status(401).json({ error: error.message });
+  } else if (error.message === 'password must be at least 3 characters long') {
+    response.status(400).json({ error: error.message });
   }
 
   next(error);
