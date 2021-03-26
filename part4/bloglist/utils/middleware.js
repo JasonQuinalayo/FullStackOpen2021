@@ -26,7 +26,7 @@ const errorHandler = (error, request, response, next) => {
       error: 'invalid token',
     });
   } else if (error.message === 'missing or invalid token' || error.message === 'unauthorized deletion'
-    || error.message === 'unauthorized update') {
+    || error.message === 'unauthorized update' || error.message === 'invalid username or password') {
     response.status(401).json({
       error: error.message,
     });
