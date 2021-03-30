@@ -30,6 +30,8 @@ blogsRouter.delete('/:id', async (request, response, next) => {
   } else if (user._id.toString() === blog.user.toString()) {
     blog.remove({});
     response.status(204).end();
+    user.blogs = user.blogs.filter((blogId) => blogId.toString() !== request.params.id);
+    await user.save();
   } else {
     throw Error('unauthorized deletion');
   }
@@ -38,17 +40,12 @@ blogsRouter.delete('/:id', async (request, response, next) => {
 blogsRouter.put('/:id', async (request, response, next) => {
   const { user } = request;
   if (!user) throw Error('missing or invalid token');
-  const blog = await Blog.findById(request.params.id);
+  const blog = await Blog.findByIdAndUpdate(request.params.id, request.body, { new: true })
+    .populate('user', { username: 1, name: 1 });
   if (!blog) {
     next();
-  } else if (user._id.toString() === blog.user.toString()) {
-    const result = await blog.update(
-      { likes: request.body.likes },
-      { new: true },
-    );
-    response.json(result);
   } else {
-    throw Error('unauthorized update');
+    response.json(blog);
   }
 });
 
